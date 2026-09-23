@@ -486,20 +486,29 @@ html.reveal-enabled .reveal.is-in { opacity:1; transform:none; }
   }
   .nav--left .nav-item__btn:hover { color:var(--cream); }
   .nav--left .nav-item__btn .caret { margin-left:.5rem; }
-  .nav--left .dropdown {
-    /* static expansion inside the panel — no overlay, no clipping */
+  .nav--left .dropdown,
+  .nav--left .nav-item.open > .dropdown {
+    /* static expansion inside the panel — no overlay, no clipping, no
+       centering shift. Specificity raised to (0,3,0) so this rule beats the
+       desktop open-state rule (.nav-item.open > .dropdown), which would
+       otherwise translateX(-50%) the submenu half off the mobile screen. */
     position:static; transform:none; opacity:1; visibility:visible;
     min-width:0; box-shadow:none; border:0; padding:0 0 0 1rem;
     background:transparent;
     display:none;
   }
-  .nav--left .nav-item.open .dropdown { display:block; }
+  .nav--left .nav-item.open .dropdown,
+  .nav--left .nav-item.open > .dropdown { display:block; }
   .nav--left .dropdown a {
     padding:.8rem 0 .8rem 1.1rem; font-size:.98rem; white-space:normal;
     border-bottom:1px solid var(--line); color:var(--cream-2);
   }
   .nav--left .dropdown a::before { content:"— "; color:var(--platinum-deep); }
   .nav--left .dropdown a[aria-current="page"] { color:var(--platinum-bright); }
+  /* Submenu links keep a floor indent (no fixed px margin that could push
+     text off narrow screens); panel itself scrolls if a long list opens. */
+  .nav--left .nav-item__btn { padding-left:0; }
+  .nav--left { padding-left:max(var(--gutter), 1.25rem); padding-right:max(var(--gutter), 1.25rem); }
 
   /* hero Call / WhatsApp pair: clearly separated, equal-width, easy to tap */
   .hero__topcta { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; }
