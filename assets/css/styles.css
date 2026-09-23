@@ -375,8 +375,11 @@ html.reveal-enabled .reveal.is-in { opacity:1; transform:none; }
     /* Full-screen mobile menu: solid midnight background covering the entire
        viewport (and everything behind it) while open. Sits BELOW the sticky
        header (z-index 50) so the toggle stays visible and tappable, and is
-       padded down to clear the header before its own content starts. */
-    position:fixed; inset:0; z-index:45;
+       padded down to clear the header before its own content starts.
+       Width/height are pinned explicitly (inset:0 alone resolved the width
+       against the header grid column in some browsers). */
+    position:fixed; left:0; top:0; width:100vw; height:100vh; height:100dvh;
+    z-index:45;
     background:var(--midnight);
     flex-direction:column; align-items:stretch; gap:0;
     padding:9rem var(--gutter) 3rem;
