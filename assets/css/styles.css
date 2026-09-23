@@ -363,6 +363,11 @@ html.reveal-enabled .reveal.is-in { opacity:1; transform:none; }
      doesn't pull the logo off-centre: hamburger in col1, logo in col2 (centre),
      empty CTA slot in col3. */
   .site-header__inner { grid-template-columns:1fr auto 1fr; align-items:center; }
+  /* CRITICAL: backdrop-filter makes the header the containing block for
+     position:fixed descendants, which pins the full-screen menu to the
+     header's box instead of the viewport (the original overlay bug).
+     Remove it on mobile; a slightly more opaque background compensates. */
+  .site-header { backdrop-filter:none; background:rgba(12,12,18,.95); }
   .nav-toggle { justify-self:start; grid-column:1; grid-row:1; }
   .brand--centre { justify-self:center; grid-column:2; grid-row:1; }
   .header-cta { grid-column:3; grid-row:1; }
