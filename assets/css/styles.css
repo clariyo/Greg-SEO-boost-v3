@@ -247,6 +247,8 @@ ul.tick li::before { content:""; width:7px; height:7px; margin-top:.7rem; border
 /* ---------- Locations ---------- */
 .locations { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:1.8rem; }
 .locations li { padding:.5rem 1rem; border:1px solid var(--line); border-radius:999px; font-size:.85rem; color:var(--cream-2); letter-spacing:.02em; }
+.locations li a { color:inherit; text-decoration:none; }
+.locations li a:hover { color:var(--platinum-bright); }
 
 /* ---------- CTA band ---------- */
 .cta-band {
@@ -297,7 +299,7 @@ ul.tick li::before { content:""; width:7px; height:7px; margin-top:.7rem; border
 .site-footer { background:var(--midnight); border-top:1px solid var(--line); padding-block:clamp(3rem,5vw,4rem) 1.6rem; margin-top:clamp(3rem,6vw,5rem); }
 .site-footer a { color:var(--cream-2); }
 .site-footer a:hover { color:var(--platinum-bright); }
-.site-footer__grid { display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:2rem; }
+.site-footer__grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:2rem; }
 .site-footer .brand__name b { color:var(--cream); }
 .site-footer h4 { color:var(--platinum); font-size:.7rem; letter-spacing:.2em; text-transform:uppercase; margin-bottom:1rem; font-family:var(--font-eyebrow); font-weight:600; }
 .site-footer li { margin-bottom:.6rem; font-size:.95rem; }
@@ -365,15 +367,23 @@ html.reveal-enabled .reveal.is-in { opacity:1; transform:none; }
   .brand--centre { justify-self:center; grid-column:2; grid-row:1; }
   .header-cta { grid-column:3; grid-row:1; }
   .nav--left {
-    position:fixed; inset:64px 0 auto 0; background:var(--midnight);
-    flex-direction:column; align-items:flex-start; gap:0;
-    padding:1rem var(--gutter) 1.6rem; border-bottom:1px solid var(--line);
-    box-shadow:var(--shadow-md); transform:translateY(-130%); transition:transform .32s var(--ease);
-    z-index:40;
+    /* Full-screen mobile menu: solid midnight background covering the entire
+       viewport (and everything behind it) while open. Sits BELOW the sticky
+       header (z-index 50) so the toggle stays visible and tappable, and is
+       padded down to clear the header before its own content starts. */
+    position:fixed; inset:0; z-index:45;
+    background:var(--midnight);
+    flex-direction:column; align-items:stretch; gap:0;
+    padding:9rem var(--gutter) 3rem;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    transform:translateY(-102%); transition:transform .32s var(--ease);
   }
   .nav--left.open { transform:translateY(0); }
-  .nav--left > a { width:100%; padding:.9rem 0; font-size:1.05rem; border-bottom:1px solid var(--line); }
+  .nav--left > a { width:100%; padding:1rem 0; font-size:1.1rem; border-bottom:1px solid var(--line); }
   .nav--left > a.active::after { display:none; }
+  .nav--left .nav-item { width:100%; border-bottom:1px solid var(--line); }
+  .nav--left .nav-item__btn { width:100%; padding:1rem 0; font-size:1.1rem; border:0; }
+  .nav--left .nav-item__btn .caret { margin-left:auto; }
   .nav-toggle { display:flex; align-items:center; justify-content:center; }
   .brand--centre { justify-self:center; }
   .brand__logo--mono, .brand__logo--mono img { height:92px; width:auto; }
@@ -396,6 +406,10 @@ html.reveal-enabled .reveal.is-in { opacity:1; transform:none; }
 .svc-cta { display:flex; flex-wrap:wrap; gap:.85rem; align-items:center; }
 .svc-cta .btn { flex:0 1 auto; }
 
+/* Hero top CTA pair: consistent gap at every width (the mobile grid override
+   in the media block below takes over under 760px) */
+.hero__topcta { display:flex; flex-wrap:wrap; gap:.9rem; }
+
 /* Breadcrumbs on service pages */
 .crumbs { font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; color:var(--cream-2,#8b8578); margin-bottom:1.1rem; }
 .crumbs a { color:inherit; text-decoration:none; border-bottom:1px solid transparent; }
@@ -414,4 +428,80 @@ html.reveal-enabled .reveal.is-in { opacity:1; transform:none; }
 @media (max-width:520px) {
   .svc-cta { flex-direction:column; align-items:stretch; }
   .svc-cta .btn { width:100%; justify-content:center; }
+}
+
+/* ============================================================
+   v3 SEO boost — nav dropdowns (Services / Areas) + mobile menu
+   submenu + paired hero CTA spacing.
+   ============================================================ */
+
+/* ---------- Desktop dropdowns (click/tap to open — no hover dependency) ---------- */
+.nav-item { position:relative; display:inline-flex; align-items:center; }
+.nav-item > a { color:var(--cream-2); font-size:1rem; font-weight:500; position:relative; padding-block:.2rem; letter-spacing:.01em; }
+.nav-item > a:hover { color:var(--cream); }
+.nav-item > a.active { color:var(--platinum-bright); }
+.nav-item > a.active::after { content:""; position:absolute; left:0; right:0; bottom:-.35rem; height:1px; background:var(--platinum); }
+.nav-item__btn {
+  background:none; border:0; cursor:pointer;
+  color:var(--cream-2); font-size:1rem; font-weight:500; letter-spacing:.01em;
+  display:inline-flex; align-items:center; gap:.45rem; padding-block:.2rem;
+  font-family:var(--font-body); transition:color .2s var(--ease);
+}
+.nav-item__btn:hover { color:var(--cream); }
+.caret { width:.62em; height:.62em; flex:none; display:inline-block; transition:transform .22s var(--ease); }
+.nav-item.open .caret { transform:rotate(180deg); }
+
+.dropdown {
+  position:absolute; top:calc(100% + .65rem); left:50%; transform:translateX(-50%) translateY(6px);
+  min-width:230px;
+  background:var(--anthracite-2); border:1px solid var(--line-2); border-radius:var(--radius);
+  box-shadow:var(--shadow-md);
+  padding:.55rem 0;
+  opacity:0; visibility:hidden; transition:opacity .2s var(--ease), transform .2s var(--ease), visibility 0s .2s;
+  z-index:60;
+}
+.nav-item.open > .dropdown { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); transition-delay:0s; }
+.dropdown a {
+  display:block; padding:.6rem 1.4rem;
+  color:var(--cream-2); font-size:.95rem; white-space:nowrap;
+}
+.dropdown a:hover { color:var(--cream); background:rgba(184,189,196,.08); }
+.dropdown a[aria-current="page"] { color:var(--platinum-bright); }
+.dropdown a + a { border-top:1px solid var(--line); }
+
+/* ---------- Mobile menu submenu (inside the full-screen panel) ---------- */
+@media (max-width: 760px){
+  .nav--left .nav-item { display:block; position:static; }
+  .nav--left .nav-item__btn {
+    display:flex; align-items:center; text-align:left;
+    color:var(--cream-2); border-bottom:1px solid var(--line);
+  }
+  .nav--left .nav-item__btn:hover { color:var(--cream); }
+  .nav--left .nav-item__btn .caret { margin-left:.5rem; }
+  .nav--left .dropdown {
+    /* static expansion inside the panel — no overlay, no clipping */
+    position:static; transform:none; opacity:1; visibility:visible;
+    min-width:0; box-shadow:none; border:0; padding:0 0 0 1rem;
+    background:transparent;
+    display:none;
+  }
+  .nav--left .nav-item.open .dropdown { display:block; }
+  .nav--left .dropdown a {
+    padding:.8rem 0 .8rem 1.1rem; font-size:.98rem; white-space:normal;
+    border-bottom:1px solid var(--line); color:var(--cream-2);
+  }
+  .nav--left .dropdown a::before { content:"— "; color:var(--platinum-deep); }
+  .nav--left .dropdown a[aria-current="page"] { color:var(--platinum-bright); }
+
+  /* hero Call / WhatsApp pair: clearly separated, equal-width, easy to tap */
+  .hero__topcta { display:grid; grid-template-columns:1fr 1fr; gap:.9rem; }
+  .hero__topcta .btn { width:100%; justify-content:center; padding-inline:.6rem; }
+  .hero__topcta .btn .tel { display:block; font-size:.78rem; }
+}
+
+@media (max-width:400px) {
+  /* 375–400px: stacking would crowd them again side-by-side, so keep the pair
+     side by side only when each button has room; stack cleanly otherwise. */
+  .hero__topcta { grid-template-columns:1fr; }
+  .hero__topcta .btn .tel { display:inline; font-size:inherit; }
 }

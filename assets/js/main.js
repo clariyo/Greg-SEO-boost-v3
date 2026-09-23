@@ -6,17 +6,59 @@
   var toggle = document.getElementById("navToggle");
   var nav = document.getElementById("nav");
   if (toggle && nav) {
-    toggle.addEventListener("click", function () {
-      var open = nav.classList.toggle("open");
+    var setMenu = function (open) {
+      nav.classList.toggle("open", open);
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      // Full-screen menu: stop the page behind it from scrolling while open.
+      document.body.style.overflow = open ? "hidden" : "";
+    };
+    toggle.addEventListener("click", function () {
+      setMenu(!nav.classList.contains("open"));
     });
     nav.addEventListener("click", function (e) {
-      if (e.target.closest("a")) {
-        nav.classList.remove("open");
-        toggle.setAttribute("aria-expanded", "false");
+      // Following a link closes the menu (dropdown buttons are handled
+      // separately by their own listeners and must not close the menu).
+      if (e.target.closest("a")) setMenu(false);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && nav.classList.contains("open")) {
+        setMenu(false);
+        toggle.focus();
       }
     });
   }
+
+  /* ---------- Nav dropdowns (desktop + mobile share the same pattern) ---------- */
+  document.querySelectorAll(".nav-item").forEach(function (item) {
+    var btn = item.querySelector(".nav-item__btn");
+    if (!btn) return;
+    btn.setAttribute("aria-expanded", "false");
+    btn.addEventListener("click", function (e) {
+      e.preventDefault();
+      var isOpen = item.classList.toggle("open");
+      btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      // Only one dropdown open at a time.
+      if (isOpen) {
+        document.querySelectorAll(".nav-item.open").forEach(function (other) {
+          if (other !== item) {
+            other.classList.remove("open");
+            var ob = other.querySelector(".nav-item__btn");
+            if (ob) ob.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+    });
+  });
+  document.addEventListener("click", function (e) {
+    // Click outside an open dropdown closes it (desktop behaviour).
+    document.querySelectorAll(".nav-item.open").forEach(function (item) {
+      if (!item.contains(e.target) && !nav.contains(e.target)) {
+        item.classList.remove("open");
+        var b = item.querySelector(".nav-item__btn");
+        if (b) b.setAttribute("aria-expanded", "false");
+      }
+    });
+  });
 
   /* ---------- Footer year ---------- */
   var y = document.getElementById("year");
@@ -186,3 +228,35 @@
     update();
   })();
 })();
+
+  /* ---------- test-harness probe (only with ?probe in URL) ---------- */
+  if (location.search.indexOf("probe") !== -1) {
+    var report = function(tag) {
+      var n = document.getElementById("nav");
+      if (!n) return;
+      var r = n.getBoundingClientRect();
+      var cs = getComputedStyle(n);
+      // find any visible text element NOT inside header that overlaps the nav panel area
+      var overlap = [];
+      if (cs.position === "fixed") {
+        document.querySelectorAll("main h1, main p, main a").forEach(function(el) {
+          var er = el.getBoundingClientRect();
+          if (er.bottom < 0 || er.top > window.innerHeight) return;
+          var hit = document.elementFromPoint(er.left + er.width/2, Math.min(er.top + er.height/2, window.innerHeight - 2));
+          if (hit && !n.contains(hit) && !hit.closest("header")) {
+            overlap.push(el.tagName + ":" + (el.textContent || "").trim().slice(0, 30));
+          }
+        });
+      }
+      parent.postMessage(tag + " pos=" + cs.position + " z=" + cs.zIndex + " bg=" + cs.backgroundColor +
+        " rect=" + Math.round(r.left) + "," + Math.round(r.top) + "," + Math.round(r.width) + "x" + Math.round(r.height) +
+        " overlapCount=" + overlap.length + (overlap.length ? " overlap=" + overlap.slice(0,3).join(" | ") : ""), "*");
+    };
+    var t = document.getElementById("navToggle");
+    if (t) {
+      t.addEventListener("click", function() {
+        setTimeout(function() { report("AFTER-OPEN"); }, 450);
+      });
+      setTimeout(function() { report("LOADED"); }, 300);
+    }
+  }
